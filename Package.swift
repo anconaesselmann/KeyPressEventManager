@@ -7,7 +7,7 @@ let package = Package(
     name: "KeyPressEventManager",
     platforms: [
         .macOS(.v14),
-//        .iOS(.v14),
+        .iOS(.v17),
 //        .watchOS(.v8),
 //        .tvOS(.v15)
     ],
