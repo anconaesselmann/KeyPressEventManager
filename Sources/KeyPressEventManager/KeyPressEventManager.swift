@@ -77,7 +77,7 @@ public class KeyPressEventManager {
             return nil
         }
         guard !blocked.contains(keyPressEvent) else {
-            return event
+            return nil
         }
         return event
     }
