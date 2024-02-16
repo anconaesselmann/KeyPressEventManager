@@ -15,8 +15,11 @@ public class KeyPressEventManager {
 
     public let events = PassthroughSubject<KeyPressEvent, Never>()
     public let listening = CurrentValueSubject<Bool, Never>(false)
+    public var blockAllEvents = false
 
     private var registered = Set<KeyPressEvent>()
+
+    private var registeredForApplicationUse = Set<KeyPressEvent>()
 
     private var blocked = Set<KeyPressEvent>()
 
@@ -35,6 +38,11 @@ public class KeyPressEventManager {
 
     public func blockForApplicationUse(_ keyEvents: [KeyPressEvent]) {
         self.blocked = Set(keyEvents)
+    }
+
+    public func registerForApplicationUse(_ keyEvents: [KeyPressEvent]) {
+        addBlockForApplicationUse(keyEvents)
+        self.registeredForApplicationUse = Set(keyEvents)
     }
 
     public func addBlockForApplicationUse(_ keyEvents: KeyPressEvent...) {
@@ -61,7 +69,9 @@ public class KeyPressEventManager {
     }
 
     private func onKeyPressEvent(_ event: NSEvent) -> NSEvent? {
-
+        guard !blockAllEvents else {
+            return event
+        }
         guard let keyPressEvent = KeyPressEvent(event: event) else {
             return event
         }
@@ -76,8 +86,11 @@ public class KeyPressEventManager {
         guard !supressed.contains(keyPressEvent) else {
             return nil
         }
-        guard !blocked.contains(keyPressEvent) else {
+        guard !registeredForApplicationUse.contains(keyPressEvent) else {
             return nil
+        }
+        guard !blocked.contains(keyPressEvent) else {
+            return event
         }
         return event
     }
