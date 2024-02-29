@@ -15,7 +15,8 @@ public class KeyPressEventManager {
 
     public let events = PassthroughSubject<KeyPressEvent, Never>()
     public let listening = CurrentValueSubject<Bool, Never>(false)
-    public var blockAllEvents = false
+
+    private(set) public var eventBlocking = Set<UUID>()
 
     private var registered = Set<KeyPressEvent>()
 
@@ -24,6 +25,10 @@ public class KeyPressEventManager {
     private var blocked = Set<KeyPressEvent>()
 
     private var supressed = Set<KeyPressEvent>()
+
+    private var blockAllEvents: Bool {
+        !eventBlocking.isEmpty
+    }
 
     public func register(_ event: KeyPressEvent) throws {
         guard !blocked.contains(event) else {
@@ -59,6 +64,14 @@ public class KeyPressEventManager {
 
     public func isBlocked(_ keyEvent: KeyPressEvent) -> Bool {
         self.blocked.contains(keyEvent)
+    }
+
+    public func startBlocking(_ id: UUID) {
+        eventBlocking.insert(id)
+    }
+
+    public func stopBlocking(_ id: UUID) {
+        eventBlocking.remove(id)
     }
 
 #if os(macOS)
